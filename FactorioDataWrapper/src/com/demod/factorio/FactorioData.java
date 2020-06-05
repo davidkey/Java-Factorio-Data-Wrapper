@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
-import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -199,7 +198,12 @@ public class FactorioData {
 	}
 
 	private static DataTable initializeDataTable() throws JSONException, IOException {
-		setupWorkingDirectory();
+		/*
+		 * Stick the config file into the same folder as the jar we're executing and we
+		 * can skip this. Also totally breaks things if running in an app container /
+		 * self-hosted spring boot jar, etc.
+		 */
+		// setupWorkingDirectory();
 
 		factorio = new File(Config.get().getString("factorio"));
 
@@ -364,23 +368,5 @@ public class FactorioData {
 			values.put("L", (double) level);
 			return (int) expression.evaluate(values);
 		};
-	}
-
-	private static void setupWorkingDirectory() {
-		String className = FactorioData.class.getName().replace('.', '/');
-		String classJar = FactorioData.class.getResource("/" + className + ".class").toString();
-		if (classJar.startsWith("jar:")) {
-			try {
-				File jarFolder = new File(
-						FactorioData.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath())
-								.getParentFile();
-				// System.out.println("Jar Folder: " +
-				// jarFolder.getAbsolutePath());
-				System.setProperty("user.dir", jarFolder.getAbsolutePath());
-			} catch (URISyntaxException e) {
-				e.printStackTrace();
-				System.exit(-1);
-			}
-		}
 	}
 }
